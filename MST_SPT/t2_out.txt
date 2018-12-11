@@ -1,0 +1,12 @@
+Edges in MST(vertex1, vertex2, weight):
+(1, 5, 2.00)
+(1, 3, 4.00)
+(3, 2, 7.00)
+(5, 4, 9.00)
+Sum of weight: 22.00
+
+Shortest path from vertex1
+1 -> 2: 11.00, path:1 3 2 
+1 -> 3: 4.00, path:1 3 
+1 -> 4: 11.00, path:1 5 4 
+1 -> 5: 2.00, path:1 5 
