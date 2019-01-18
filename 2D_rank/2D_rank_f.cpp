@@ -22,7 +22,7 @@ enum sortOption {x, y, order}; //options that sort algo will sort by
 
 vector<Point> getInput() {
   FILE *f;
-	if (NULL == (f = fopen("text2.txt", "r"))) {
+	if (NULL == (f = fopen("text1.txt", "r"))) {
 		printf("Fail to open the file");
 		exit(EXIT_FAILURE);
 	}
