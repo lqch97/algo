@@ -258,7 +258,7 @@ Node gamePlaying(vector<int> puzzle) {
     }
   }
 
-  cout << "search failure";
+  cout << "search failure\n";
   return Node();
 }
 
@@ -297,6 +297,8 @@ void printSteps(Node node) {
 
 int main() {
   vector<int> puzzle;
+
+  cout << "Please input the init puzzle(ex: 2 0 3 1 8 4 7 6 5):\n";
   getInput(puzzle);
   Node lastNode = gamePlaying(puzzle);
 
