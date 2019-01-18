@@ -1,6 +1,7 @@
 /*
+  please compile the code with C++11 compiler
 	2D Ranking
-	unfinished
+	without file I/O
 */
 
 #include <iostream>
