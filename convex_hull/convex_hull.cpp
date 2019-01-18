@@ -1,172 +1,192 @@
 /*
-	2D Ranking
-	final version
+	convex hull
+
+	appraoch: divide and conquer
+
+	language: c++11
 */
 
+
 #include <iostream>
+#include <algorithm>
 #include <vector>
-#include <stdio.h>
-#include <stdlib.h>
 using namespace std;
 
 struct Point {
-  float x;
-  float y;
-  int rank;
+	double x;
+	double y;
 
-  int order; //the original ordering of every point
-  bool leftSide; //to distinct two splited arr after join
+	double polerAngle;
+
+	Point(): {};
+	Point(double a, double b): x(a), y(b) {};
 };
 
-enum sortOption {x, y, order}; //options that sort algo will sort by
+enum sortOption {x, y, angle}; //options that sort algo will sort by
 
-vector<Point> getInput() {
-  FILE *f;
-	if (NULL == (f = fopen("text1.txt", "r"))) {
-		printf("Fail to open the file");
-		exit(EXIT_FAILURE);
-	}
-  int count = 0;
-  vector<Point> input;
-  Point temp = Point();
-  while(fscanf(f, "%f%f", &temp.x, &temp.y) != EOF ) {
-    temp.order = count++;
-    input.push_back(temp);
-  }
-  fclose(f);
-  return input;
-}
-
-void printP(Point p) {
-  printf("(%.2f, %.2f): %d\n", p.x, p.y, p.rank);
-}
-
-void output(vector<Point> input) {
-	int pointNum = input.size(),
-		maxRank = input[0].rank,
-		minRank = input[0].rank,
-		sum = 0;
-    for(int i = 0; i < input.size(); ++i) {
-      sum += input[i].rank;
-      if(input[i].rank > maxRank)
-  			maxRank = input[i].rank;
-  		if(input[i].rank < minRank)
-  			minRank = input[i].rank;
-  		printP(input[i]);
-    }
-	cout << "num of point: " << pointNum << endl
-		<< "maxRank: " << maxRank << endl
-		<< "minRank: " << minRank << endl
-    << "sum" << sum << endl
-		<< "aveRank: " << (float)sum / pointNum << endl;
-}
-
+//sorting part
 void swap(Point &a, Point &b) {
 	Point temp = a;
 	a = b;
 	b = temp;
 }
 
-void restore(vector<Point> &list, int root, int last, sortOption op) {
-  int left = root * 2 + 1,
-    right = root * 2 + 2,
-    largest = root;
+//the recursive subroutine for quickSort
+void quickSortRec(vector<Point> &v, int start, int end, sortOption op) {
+	if(start >= end)
+		return;
 
-  //sort by x
-  if(op == x) {
-	  if(left <= last && list[left].x > list[largest].x) {
-	    largest = left;
-	  }
-	  if(right <= last && list[right].x > list[largest].x) {
-	    largest = right;
-	  }
-  }
+	int i = start + 1, j = end;
+	int pivot = start;
 
-  //sort by y
-  else if(op == y) {
-	  if(left <= last && list[left].y > list[largest].y) {
-	    largest = left;
-	  }
-	  if(right <= last && list[right].y > list[largest].y) {
-	    largest = right;
-	  }
-  }
+	//sort algo different from op
+	if(op == x) {
+		while(i <= j) {
+			while( (v[i].x <= v[pivot].x) && (i <= end) )
+				++i;
+			while( (v[j].x >= v[pivot].x) && (j >= start + 1) )
+				--j;
+			if(i < j)
+				swap(v[i], v[j]);
+		}
+	}
+	else if(op == y) {
+		while(i <= j) {
+			while( (v[i].y <= v[pivot].y) && (i <= end) )
+				++i;
+			while( (v[j].y >= v[pivot].y) && (j >= start + 1) )
+				--j;
+			if(i < j)
+				swap(v[i], v[j]);
+		}
+	}
 
-  //sort by original order
-  else if(op == order) {
-	  if(left <= last && list[left].order > list[largest].order) {
-	    largest = left;
-	  }
-	  if(right <= last && list[right].order > list[largest].order) {
-	    largest = right;
-	  }
-  }
-
-  if(largest != root) {
-    swap(list[largest], list[root]);
-    restore(list, largest, last, op);
-  }
+	swap(v[j], v[start]);
+	quickSortRec(v, start, j - 1, op);
+	quickSortRec(v, j + 1, end, op);
 }
 
-void construct(vector<Point> &list, sortOption op) {
-  //construct a max heap for heapsort
-  int last = list.size() - 1;
-  for(int i = (last - 1) / 2; i >= 0; --i) {
-    restore(list, i, last, op);
-  }
+void quickSort(vector<Point> &v, sortOption op) {
+	int start = 0;
+	int end = v.size() - 1;
+	quickSortRec(v, start, end, op);
+}
+//sort part end
+
+vector<Point> getInput() {
+	vector<Point> in;
+	while(!cin.eof()) {
+		Point temp = Point();
+		cin >> temp.x;
+		cin >> temp.y;
+		in.push_back(temp);
+	}
+	return in;
 }
 
-void heapsort(vector<Point> &list, sortOption op) {
-  int last = list.size() - 1;
-  construct(list, op);
-  while(last > 0) {
-    swap(list[0], list[last]);
-    last -= 1;
-    restore(list, 0, last, op);
-  }
+//conve hull funcs
+Point mid;
+int quad(pair<int, int> p)
+{
+    if (p.first >= 0 && p.second >= 0)
+        return 1;
+    if (p.first <= 0 && p.second >= 0)
+        return 2;
+    if (p.first <= 0 && p.second <= 0)
+        return 3;
+    return 4;
 }
 
-vector<Point> ranking(vector<Point> input) {
-  if(input.size() == 1) {
-    input[0].rank = 0;
-    return input;
-  }
-	heapsort(input, x);
+bool compare(Point p1, Point q1)
+{
+    pair<double, double> p = make_pair(p1.x - mid.x,
+                                 p1.y - mid.y);
+    pair<double, double> q = make_pair(q1.x - mid.x,
+                                 q1.y - mid.y);
 
+    int one = quad(p);
+    int two = quad(q);
+
+    if (one != two)
+        return (one < two);
+    return (p.second*q.first < q.second*p.first);
+}
+
+vector<Point> bruteHull(vector<Point> v) {
+	vector<Point> hull;
+
+	//take any two point, if all other point is of same side of the edge
+	//of two point, the egde if in convexHUll
+	for(int i = 0; i < v.size(); ++i) {
+		for(int j = i + 1; j < v.size(); ++j) {
+			int x1 = v[i].x, x2 = v[j].x;
+			int y1 = v[i].y, y2 = v[j].y;
+
+			int a1 = y1-y2;
+			int b1 = x2-x1;
+			int c1 = x1*y2-y1*x2;
+			int pos = 0, neg = 0;
+			for (int k=0; k<v.size(); k++)
+			{
+					if (a1*v[k].x+b1*v[k].y+c1 <= 0)
+							neg++;
+					if (a1*v[k].x+b1*v[k].y+c1 >= 0)
+							pos++;
+			}
+			if (pos == v.size() || neg == v.size())
+			{
+					hull.push_back(v[i]);
+					hull.push_back(v[j]);
+			}
+		}
+	}
+
+	// Sorting the points in the anti-clockwise order
+	mid = Point(0,0);
+	int n = ret.size();
+	for (int i=0; i<n; i++)
+	{
+			mid.x += ret[i].x;
+			mid.y += ret[i].y;
+			ret[i].x *= n;
+			ret[i].y *= n;
+	}
+	sort(ret.begin(), ret.end(), compare);
+	for (int i=0; i<n; i++)
+			ret[i] = make_pair(ret[i].first/n, ret[i].second/n);
+
+	return hull;
+}
+
+vector<Point> merge(vector<Point> left, vector<Point> right) {
+	vector<Point> ret_val;
+
+	return ret_val;
+}
+
+vector<Point> convexHull(vector<Point> input) {
+	if(input.size() <= 5) {
+		vector<Point> ret_val = bruteHull(input);
+		return ret_val;
+	}
+  quickSort(input, x);
   //split the input array
   size_t const half_size = input.size() / 2;
   vector<Point> left(input.begin(), input.begin() + half_size); //left part of input
   vector<Point> right(input.begin() + half_size, input.end()); //right part
 
-  left = ranking(left);
-  right = ranking(right);
+  left = convexHull(left);
+  right = convexHull(right);
 
-  input.clear();
-  for(int i = 0; i < left.size(); ++i) {
-    left[i].leftSide = true;
-    input.push_back(left[i]);
-  }
-  for(int i = 0; i < right.size(); ++i) {
-    right[i].leftSide = false;
-    input.push_back(right[i]);
-  }
-  heapsort(input, y);
-
-  for(int i = 0, count = 0; i < input.size(); ++i) {
-    if(input[i].leftSide == true)
-      ++count;
-    else {
-      input[i].rank += count;
-    }
-  }
-
-  return input;
+	vector<Point> ret_val = merge(left, right);
+	return ret_val;
 }
 
 int main() {
-  vector<Point> input;
-  input = getInput();
-  input = ranking(input);
-  heapsort(input, order);	//reordering the output
-  output(input);
+	vector<Point> v;
+	v = getInput();
+	quickSort(v, y);
+	for(auto x: v) {
+		cout << "(" << x.x << " " << x.y << ")" << endl;
+	}
 }
