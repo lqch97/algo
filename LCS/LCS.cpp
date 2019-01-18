@@ -8,15 +8,12 @@
 #include <stack>
 using namespace std;
 
-string s1, s2;
-
 enum direction {W, NW, N}; //west, north-west, north
 
 string LCS(string s1, string s2) {
   int m = s1.length(), n = s2.length();
   int L[m+1][n+1];
   direction prev[m+1][n+1]; //previous position where L[i][j] from
-  stack<char> s;
 
   for(int i = 0; i <= m; ++i) L[i][0] = 0;
   for(int j = 0; j <= n; ++j) L[0][j] = 0;
@@ -36,11 +33,13 @@ string LCS(string s1, string s2) {
       }
     }
   }
-  //return L[m][n];
+
   //LCS is now in L[m][n]
   //generate the substring
   int len = L[m][n]; //len of LCS
   string out_str;
+  stack<char> s;
+
   for(int i = m , j = n ; len > 0; ) {
     switch (prev[i][j]) {
       case NW:
@@ -61,5 +60,11 @@ string LCS(string s1, string s2) {
 int main() {
   string s1, s2;
   cin >> s1 >> s2;
-  cout << LCS(s1, s2);
+
+  cout << "string1: " << s1 << "\n\n";
+  cout << "string2: " << s2 << "\n\n";
+
+  string out_str = LCS(s1, s2);
+  cout << "LCS: " << out_str << "\n\n";
+  cout << "length of LCS: " << out_str.length() << "\n\n";
 }
