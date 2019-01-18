@@ -62,8 +62,7 @@ double smallest(vector<double> in_list, int key) {
   for(auto list: lists) {
     mid_list.push_back(list[2]);
   }
-  sort(mid_list.begin(), mid_list.end());
-  double mid_num = mid_list[(mid_list.size() - 1) / 2];
+  double mid_num = smallest(mid_list, (mid_list.size() + 1) / 2);
 
   // split original list into list1 ,list2, list3
   // by the relation between mid_num
@@ -96,14 +95,18 @@ int main() {
   cout << "nums from file was read.\n";
 
   int k;
-  cout << "please input k, so that k-th num will be search\n";
-  cout << "(non-integer to terminate):\n";
+  cout << "\nplease input k, so that k-th num will be searched, ";
+  cout << "(non-integer to terminate): ";
   while(cin >> k) {
-    double sel_num = smallest(v, k);
-
-    cout << k << "-th smallest num is ";
-    cout << sel_num;
-    cout << "\nplease input k, so that k-th num will be search\n";
+    if(k < 1 || k > v.size()) {
+      cout << "\nout of range.\n";
+    }
+    else {
+      double sel_num = smallest(v, k);
+      cout << endl << k << "-th smallest num is ";
+      cout << sel_num << endl;
+    }
+    cout << "\nplease input k, so that k-th num will be searched: ";
   }
-  cout << "done.";
+  cout << "\ndone.\n";
 }
