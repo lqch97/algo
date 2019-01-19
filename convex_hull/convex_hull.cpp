@@ -1,8 +1,4 @@
 /*
-
-line 220
-merge unfinished
-
 	convex hull
 
 	appraoch: divide and conquer
@@ -11,6 +7,12 @@ merge unfinished
 		because the use of some C++11 feature,
 		please compile the code in environments supporting C++11,
 		or typing the command "g++ -std=c++11 sourceCode.cpp".
+
+	at line 242
+	merging part is not finished
+		current version: O(nlog2n)
+		target				: O(nlogn)
+
 */
 
 #include <iostream>
@@ -31,7 +33,7 @@ struct Point {
 	Point(double a, double b): x(a), y(b) {};
 };
 
-enum sortOption {x, y, angle}; //options that sort algo will sort by
+enum sortOption {x, y}; //options that sort algo will sort by
 
 void swap(Point &a, Point &b) {
 	Point temp = a;
@@ -142,8 +144,38 @@ namespace gh {
 	  return ret_val;
 	}
 
-	// split the scan procedure here in easy to use
-	vector<Point> onlyScan(vector<Point> points) {
+	vector<Point> grahamScan(vector<Point> points, bool needToSort) {
+		if(needToSort) {
+			// find the point with smallest y value
+			p0 = points[0];
+			int idx_min = 0;
+			for(int i = 1; i < points.size(); ++i) {
+				if(points[i].y < p0.y ||
+					 (points[i].y == p0.y) && (points[i].x < p0.x)) {
+					p0 = points[i];
+					idx_min = i;
+				}
+			}
+			swap(points[0], points[idx_min]);
+
+			// sort elements by polar angle
+			sort(points.begin() + 1 , points.end() , compare);
+
+			// remove colinear points only remaining the farthest point
+			int m = 1;
+			for(int i = 1; i < points.size(); ++i) {
+	       while (i < points.size()-1 && orientation(p0, points[i],
+	                                    points[i+1]) == CL)
+	          ++i;
+
+	       points[m] = points[i];
+	       ++m;  // Update size of modified array
+			}
+			while(points.size() > m) points.pop_back();
+		} // sorting part ended
+
+		if(points.size() < 3) return points;
+
 		stack<Point> s;
    	s.push(points[0]);
    	s.push(points[1]);
@@ -169,65 +201,81 @@ namespace gh {
 
 		// reverse the vector
 		reverse(ret_val.begin(), ret_val.end());
+
 		return ret_val;
-	}
-
-	vector<Point> grahamScan(vector<Point> points) {
-		// find the point with smallest y value
-		p0 = points[0];
-		int idx_min = 0;
-		for(int i = 1; i < points.size(); ++i) {
-			if(points[i].y < p0.y ||
-				 (points[i].y == p0.y) && (points[i].x < p0.x)) {
-				p0 = points[i];
-				idx_min = i;
-			}
-		}
-		swap(points[0], points[idx_min]);
-
-
-		// sort elements by polar angle
-		sort(points.begin() + 1 , points.end() , compare);
-
-		// remove colinear points only remaining the farthest point
-		int m = 1;
-		for(int i = 1; i < points.size(); ++i) {
-       while (i < points.size()-1 && orientation(p0, points[i],
-                                    points[i+1]) == CL)
-          ++i;
-
-       points[m] = points[i];
-       ++m;  // Update size of modified array
-		}
-		while(points.size() > m) points.pop_back();
-
-		if(m < 3) return points;
-
-		return onlyScan(points);
 	}
 
 }; // end of gh
 
 //convex hull
 namespace cv {
-#if 0
+
+	vector<Point> twoWayMerge(Point base,
+				vector<Point> list1, vector<Point> list2) {
+		int i, j;
+		gh::p0 = base;
+		vector<Point> ret_val;
+		for(i = 0, j = 0; i < (list1.size()) && (j < list2.size()); ) {
+			if(gh::compare(list1[i], list2[j]) == 1) {
+				ret_val.push_back(list1[i++]);
+			}
+			else {
+				ret_val.push_back(list2[j++]);
+			}
+		}
+
+		while(i < list1.size()) ret_val.push_back(list1[i++]);
+		while(j < list2.size()) ret_val.push_back(list2[j++]);
+
+		return ret_val;
+	}
+
+#if 1
 	vector<Point> merge(vector<Point> left, vector<Point> right) {
 		vector<Point> ret_val;
 		for(auto p: right) left.push_back(p);
-		ret_val = gh::grahamScan(left);
+		ret_val = gh::grahamScan(left, true);
 
 		return ret_val;
 	}
 #else
 	vector<Point> merge(vector<Point> left, vector<Point> right) {
-		vector<Point> ret_val;
+		Point interior;
+		for(auto p: left) {
+			interior.x += p.x;
+			interior.y += p.y;
+		}
+		interior.x /= left.size();
+		interior.y /= left.size();
 
-		return ret_val;
+		// find the position to split 'right' list
+		int splitPoint = 0;
+		for(int i = 0; i < right.size() - 1; ++i) {
+			if(gh::orientation(interior, right[i], right[i+1]) == gh::CW) {
+				splitPoint = i + 1; break;
+			}
+		}
+
+		// split right into two part
+		// so that polar angle increase individually
+		vector<Point> r1(right.begin(), right.begin() + splitPoint);
+	  vector<Point> r2(right.begin() + splitPoint , right.end());
+		reverse(r2.begin(), r2.end());
+
+		right = twoWayMerge(interior, r1, r2);
+		left = twoWayMerge(interior, left, right);
+		left = gh::grahamScan(left, false);
+
+		// return vector<Point>();
+		return left;
 	}
 #endif
-	vector<Point> convexHull(vector<Point> input) {
+
+	vector<Point> convexHull(vector<Point> input, bool firstItr) {
+		// firstItr := first iteration
+
 		if(input.size() <= 5) {
-			vector<Point> ret_val = gh::grahamScan(input);
+			vector<Point> ret_val = gh::grahamScan(input, true);
 			return ret_val;
 		}
 	  qs::quickSort(input, x);
@@ -236,11 +284,11 @@ namespace cv {
 	  vector<Point> left(input.begin(), input.begin() + half_size); //left part of input
 	  vector<Point> right(input.begin() + half_size, input.end()); //right part
 
-	  left = convexHull(left);
-	  right = convexHull(right);
+	  left = convexHull(left, false);
+	  right = convexHull(right, false);
 
 		// output left and right in last iteration for test
-		if(left.size() + right.size() == input.size()) {
+		if(firstItr) {
 			cout << "In last iteration:\n\n";
 			cout << "left hull:\n\n";
 			for(auto x: left) {
@@ -268,14 +316,14 @@ int main() {
 	}
 	cout << endl;
 
-	// temp = gh:: grahamScan(list);
+	// temp = gh:: grahamScan(list, true);
 	// cout << "g scan:\n\n";
 	// for(auto x: temp) {
 	// 	printPoint(x);
 	// }
 	// cout << endl;
 
-	temp = cv:: convexHull(list);
+	temp = cv:: convexHull(list, true);
 	cout << "The convex hull:\n\n";
 	for(auto x: temp) {
 		printPoint(x);
