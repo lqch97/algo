@@ -42,16 +42,16 @@ struct Node {
 };
 
 string strDir(Direction d) {
-	switch (d) {
-		case U:
-			return "up";
-		case D:
-			return "down";
-		case L:
-			return "left";
-		case R:
-			return "right";
-	}
+  switch (d) {
+    case U:
+      return "up";
+    case D:
+      return "down";
+    case L:
+      return "left";
+    case R:
+      return "right";
+  }
 }
 
 void getInput(vector<int> &puzzle) {
@@ -79,25 +79,25 @@ int evaluate(vector<int> puzzle) {
 }
 
 void swap(int &a, int &b) {
-	int temp = a;
-	a = b;
-	b = temp;
+  int temp = a;
+  a = b;
+  b = temp;
 }
 
 Node move(Node root, int from, int to, Direction d) {
-	Puzzle temp_puzzle;
-	Step temp_step;
-	Node temp_node;
+  Puzzle temp_puzzle;
+  Step temp_step;
+  Node temp_node;
 
-	temp_puzzle = root.puzzle;
-	temp_step.grid = temp_puzzle[from];
-	temp_step.direction = d;
-	swap(temp_puzzle[from], temp_puzzle[to]);
-	temp_node.puzzle = temp_puzzle;
-	temp_node.steps = root.steps;
-	temp_node.steps.push_back(temp_step);
+  temp_puzzle = root.puzzle;
+  temp_step.grid = temp_puzzle[from];
+  temp_step.direction = d;
+  swap(temp_puzzle[from], temp_puzzle[to]);
+  temp_node.puzzle = temp_puzzle;
+  temp_node.steps = root.steps;
+  temp_node.steps.push_back(temp_step);
 
-	return temp_node;
+  return temp_node;
 }
 
 vector<Node> getBranches(Node root) {
@@ -115,102 +115,102 @@ vector<Node> getBranches(Node root) {
 
   // get branches
   if(space ==  0) {
-		// move up
-		temp_node = move(root, 3, 0, U);
-		ret_val.push_back(temp_node);
-		// move left
-		temp_node = move(root, 1, 0, L);
-		ret_val.push_back(temp_node);
-  }
-
-	else if(space ==  1) {
-    // move to right
-		temp_node = move(root, 0, 1, R);
-		ret_val.push_back(temp_node);
     // move up
-		temp_node = move(root, 4, 1, U);
-		ret_val.push_back(temp_node);
-		// move left
-		temp_node = move(root, 2, 1, L);
-		ret_val.push_back(temp_node);
-  }
-
-	else if(space ==  2) {
-    // move to right
-		temp_node = move(root, 1, 2, R);
-		ret_val.push_back(temp_node);
-    // move up
-		temp_node = move(root, 5, 2, U);
-		ret_val.push_back(temp_node);
-  }
-
-	else if(space ==  3) {
-    // move down
-		temp_node = move(root, 0, 3, D);
-		ret_val.push_back(temp_node);
+    temp_node = move(root, 3, 0, U);
+    ret_val.push_back(temp_node);
     // move left
-		temp_node = move(root, 4, 3, L);
-		ret_val.push_back(temp_node);
-		// move up
-		temp_node = move(root, 6, 3, U);
-		ret_val.push_back(temp_node);
+    temp_node = move(root, 1, 0, L);
+    ret_val.push_back(temp_node);
   }
 
-	else if(space ==  4) {
-    // move down
-		temp_node = move(root, 1, 4, D);
-		ret_val.push_back(temp_node);
-    // move right
-		temp_node = move(root, 3, 4, R);
-		ret_val.push_back(temp_node);
-		// move left
-		temp_node = move(root, 5, 4, L);
-		ret_val.push_back(temp_node);
-		// move up
-		temp_node = move(root, 7, 4, U);
-		ret_val.push_back(temp_node);
+  else if(space ==  1) {
+    // move to right
+    temp_node = move(root, 0, 1, R);
+    ret_val.push_back(temp_node);
+    // move up
+    temp_node = move(root, 4, 1, U);
+    ret_val.push_back(temp_node);
+    // move left
+    temp_node = move(root, 2, 1, L);
+    ret_val.push_back(temp_node);
   }
 
-	else if(space ==  5) {
-    // move down
-		temp_node = move(root, 2, 5, D);
-		ret_val.push_back(temp_node);
-    // move right
-		temp_node = move(root, 4, 5, R);
-		ret_val.push_back(temp_node);
-		// move up
-		temp_node = move(root, 8, 5, U);
-		ret_val.push_back(temp_node);
+  else if(space ==  2) {
+    // move to right
+    temp_node = move(root, 1, 2, R);
+    ret_val.push_back(temp_node);
+    // move up
+    temp_node = move(root, 5, 2, U);
+    ret_val.push_back(temp_node);
   }
 
-	else if(space ==  6) {
+  else if(space ==  3) {
     // move down
-		temp_node = move(root, 3, 6, D);
-		ret_val.push_back(temp_node);
-    // move right
-		temp_node = move(root, 7, 6, L);
-		ret_val.push_back(temp_node);
+    temp_node = move(root, 0, 3, D);
+    ret_val.push_back(temp_node);
+    // move left
+    temp_node = move(root, 4, 3, L);
+    ret_val.push_back(temp_node);
+    // move up
+    temp_node = move(root, 6, 3, U);
+    ret_val.push_back(temp_node);
   }
 
-	else if(space ==  7) {
+  else if(space ==  4) {
     // move down
-		temp_node = move(root, 4, 7, D);
-		ret_val.push_back(temp_node);
+    temp_node = move(root, 1, 4, D);
+    ret_val.push_back(temp_node);
     // move right
-		temp_node = move(root, 6, 7, R);
-		ret_val.push_back(temp_node);
-		// move left
-		temp_node = move(root, 8, 7, L);
-		ret_val.push_back(temp_node);
+    temp_node = move(root, 3, 4, R);
+    ret_val.push_back(temp_node);
+    // move left
+    temp_node = move(root, 5, 4, L);
+    ret_val.push_back(temp_node);
+    // move up
+    temp_node = move(root, 7, 4, U);
+    ret_val.push_back(temp_node);
   }
 
-	else if(space ==  8) {
+  else if(space ==  5) {
     // move down
-		temp_node = move(root, 5, 8, D);
-		ret_val.push_back(temp_node);
+    temp_node = move(root, 2, 5, D);
+    ret_val.push_back(temp_node);
     // move right
-		temp_node = move(root, 7, 8, R);
-		ret_val.push_back(temp_node);
+    temp_node = move(root, 4, 5, R);
+    ret_val.push_back(temp_node);
+    // move up
+    temp_node = move(root, 8, 5, U);
+    ret_val.push_back(temp_node);
+  }
+
+  else if(space ==  6) {
+    // move down
+    temp_node = move(root, 3, 6, D);
+    ret_val.push_back(temp_node);
+    // move right
+    temp_node = move(root, 7, 6, L);
+    ret_val.push_back(temp_node);
+  }
+
+  else if(space ==  7) {
+    // move down
+    temp_node = move(root, 4, 7, D);
+    ret_val.push_back(temp_node);
+    // move right
+    temp_node = move(root, 6, 7, R);
+    ret_val.push_back(temp_node);
+    // move left
+    temp_node = move(root, 8, 7, L);
+    ret_val.push_back(temp_node);
+  }
+
+  else if(space ==  8) {
+    // move down
+    temp_node = move(root, 5, 8, D);
+    ret_val.push_back(temp_node);
+    // move right
+    temp_node = move(root, 7, 8, R);
+    ret_val.push_back(temp_node);
   }
 
   return ret_val;
@@ -268,7 +268,7 @@ void branchesInfo(Node root) {
   for(auto node: nodes) {
     cout << "puzzle: ";
     for(auto x: node.puzzle)
-    cout << x;
+      cout << x;
     cout << endl;
     cout << "steps: ";
     for(auto p: node.steps) {
@@ -281,18 +281,18 @@ void branchesInfo(Node root) {
 
 void printSteps(Node node) {
   int stepCount = 0;
-	cout << "goal: ";
-    for(auto x: node.puzzle)
+  cout << "goal: ";
+  for(auto x: node.puzzle)
     cout << x;
+  cout << endl;
+  cout << "steps: \n";
+  for(auto p: node.steps) {
+    cout << p.grid << " " << strDir(p.direction);
     cout << endl;
-    cout << "steps: \n";
-    for(auto p: node.steps) {
-      cout << p.grid << " " << strDir(p.direction);
-      cout << endl;
-      ++stepCount;
-    }
-    cout << "total " << stepCount << " steps.";
-    cout << endl;
+    ++stepCount;
+  }
+  cout << "total " << stepCount << " steps.";
+  cout << endl;
 }
 
 int main() {
