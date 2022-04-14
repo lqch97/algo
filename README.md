@@ -1,5 +1,5 @@
 # algo
-Practices for algorithms.
+Algorithm homeworks.
 
 bugs not repaired: N...
 
